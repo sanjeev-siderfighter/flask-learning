@@ -22,20 +22,23 @@
         <div class="col-lg-8 col-md-10 mx-auto">
 
             <!-- Todo: Fetch using a for loop from the database -->
+            {% for post in posts %}
             <div class="post-preview">
-                <a href="post.html">
+                <a href="/post/{{post.slug}}">
                     <h2 class="post-title">
-                        Man must explore, and this is exploration at its greatest
+                        {{post.title}}
                     </h2>
                     <h3 class="post-subtitle">
-                        Problems look mighty small from 150 miles up
+                        {{post.tagline}}
                     </h3>
                 </a>
+                <p>{{post.content[0:13]}}...</p>
                 <p class="post-meta">Posted by
                     <a href="#">Start Bootstrap</a>
-                    on September 24, 2019</p>
+                    on {{post.date}}</p>
             </div>
             <hr>
+            {% endfor %}
 
             <!-- Pager -->
             <div class="clearfix">
