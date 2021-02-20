@@ -45,6 +45,14 @@ class Posts(db.Model):
     img_file = db.Column(db.String(50), nullable=True)
 
 
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    if request.method == 'POST':
+        # Redirect to admin panel
+        pass
+    else:
+        return render_template("login.html", params=params)
+
 @app.route('/')
 def home():
     posts = Posts.query.filter_by().all()[0:params['no_of_post']]
