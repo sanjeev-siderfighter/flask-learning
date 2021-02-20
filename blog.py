@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 import json
@@ -8,6 +8,8 @@ with open("config.json", "r") as config:
 local_server = params["local_server"]
 
 app = Flask(__name__)
+
+app.secret_key = 'siderfighter-secret'
 
 app.config.update(
     MAIL_SERVER=params["mail_server"],
@@ -47,11 +49,21 @@ class Posts(db.Model):
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+    if 'user' in session and session['user'] == params['admin_user']:
+        posts = Posts.query.all()
+        return render_template('dashboard.html', params=params, posts=posts)
+
     if request.method == 'POST':
-        # Redirect to admin panel
-        pass
-    else:
-        return render_template("login.html", params=params)
+        username = request.form.get('uname')
+        password = request.form.get('pass')
+
+        if username == params['admin_user'] and password == params['admin_password']:
+            session['user'] = username
+            posts = Posts.query.all()
+            return render_template('dashboard.html', params=params, posts=posts)
+
+    return render_template("login.html", params=params)
+
 
 @app.route('/')
 def home():
