@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
-import json
+import json, datetime
 
 with open("config.json", "r") as config:
     params = json.load(config)["params"]
@@ -47,6 +47,25 @@ class Posts(db.Model):
     img_file = db.Column(db.String(50), nullable=True)
 
 
+@app.route('/edit/<string:sno>', methods=['GET', 'POST'])
+def edit(sno):
+    if 'user' in session and session['user'] == params['admin_user']:
+        thePost = Posts.query.filter_by(sno=sno).first()
+        if request.method == 'POST':
+            box_title = request.form.get('title')
+            tagline = request.form.get('tagline')
+            slug = request.form.get('slug')
+            content = request.form.get('content')
+            img_file = request.form.get('img_file')
+            date = datetime.datetime.now()
+
+            if sno == '0':
+                post = Posts(title=box_title, tagline=tagline, slug=slug, content=content, img_file=img_file, date=date)
+                db.session.add(post)
+                db.session.commit()
+        return render_template('edit.html', params=params, post=thePost, sno=sno)
+
+
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'user' in session and session['user'] == params['admin_user']:
@@ -90,8 +109,9 @@ def contact():
         email = request.form.get('email')
         phone = request.form.get('phone')
         msg = request.form.get('msg')
+        date = datetime.now()
 
-        entry = Contacts(name=name, email=email, phone=phone, message=msg)
+        entry = Contacts(name=name, email=email, phone=phone, message=msg, date=date)
         db.session.add(entry)
         db.session.commit()
 
