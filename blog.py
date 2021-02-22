@@ -1,7 +1,11 @@
+import datetime
+import json
+import os
+from werkzeug.utils import secure_filename
+
 from flask import Flask, render_template, request, session, redirect
-from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
-import json, datetime
+from flask_sqlalchemy import SQLAlchemy
 
 with open("config.json", "r") as config:
     params = json.load(config)["params"]
@@ -11,6 +15,7 @@ app = Flask(__name__)
 
 app.secret_key = 'siderfighter-secret'
 
+app.config['UPLOAD_FOLDER'] = params['upload_location']
 app.config.update(
     MAIL_SERVER=params["mail_server"],
     MAIL_PORT=params["mail_port"],
@@ -110,6 +115,15 @@ def about():
 def post(post_slug):
     posts = Posts.query.filter_by(slug=post_slug).first()
     return render_template("post.html", params=params, post=posts)
+
+
+@app.route('/uploader', methods=['GET', 'POST'])
+def uploader():
+    if 'user' in session and session['user'] == params['admin_user']:
+        if request.method == 'POST':
+            file = request.files['fileUploadButton']
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename)))
+            return "Uploaded Successfully"
 
 
 @app.route("/contact", methods=['GET', 'POST'])

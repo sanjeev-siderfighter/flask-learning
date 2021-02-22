@@ -18,6 +18,8 @@
     "no_of_post": 5,
 
     "admin_user": "admin",
-    "admin_password": "admin"
+    "admin_password": "admin",
+
+    "upload_location": "/Users/sanjeevkumar9/PersonalLearning/FlaskLearning/static/img"
   }
 }
