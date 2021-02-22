@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 import json, datetime
@@ -50,7 +50,6 @@ class Posts(db.Model):
 @app.route('/edit/<string:sno>', methods=['GET', 'POST'])
 def edit(sno):
     if 'user' in session and session['user'] == params['admin_user']:
-        thePost = Posts.query.filter_by(sno=sno).first()
         if request.method == 'POST':
             box_title = request.form.get('title')
             tagline = request.form.get('tagline')
@@ -63,7 +62,19 @@ def edit(sno):
                 post = Posts(title=box_title, tagline=tagline, slug=slug, content=content, img_file=img_file, date=date)
                 db.session.add(post)
                 db.session.commit()
-        return render_template('edit.html', params=params, post=thePost, sno=sno)
+            else:
+                post = Posts.query.filter_by(sno=sno).first()
+                post.title = box_title
+                post.tagline = tagline
+                post.slug = slug
+                post.content = content
+                post.img_file = img_file
+                post.date = date
+                db.session.commit()
+                return redirect('/edit/' + sno)
+
+        post = Posts.query.filter_by(sno=sno).first()
+        return render_template('edit.html', params=params, post=post)
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])
