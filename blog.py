@@ -126,6 +126,12 @@ def uploader():
             return "Uploaded Successfully"
 
 
+@app.route("/logout")
+def logout():
+    session.pop("user")
+    return redirect('/dashboard')
+
+
 @app.route("/contact", methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
