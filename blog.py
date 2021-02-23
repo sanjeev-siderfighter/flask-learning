@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import math
 from werkzeug.utils import secure_filename
 
 from flask import Flask, render_template, request, session, redirect
@@ -102,8 +103,36 @@ def dashboard():
 
 @app.route('/')
 def home():
-    posts = Posts.query.filter_by().all()[0:params['no_of_post']]
-    return render_template("index.html", params=params, posts=posts)
+    posts = Posts.query.filter_by().all()
+    last = math.ceil(len(posts) / int(params['no_of_post']))
+
+    page = request.args.get('page')
+    if not str(page).isnumeric():
+        page = 1
+
+    page = int(page)
+
+    posts = posts[(page - 1) * int(params['no_of_post']): (page - 1) * int(params['no_of_post']) + int(
+        params['no_of_post'])]
+
+    # Pagination Logic
+    if page == 1:  # First Page
+        prev = "#"
+        next = "/?page=" + str(page + 1)
+    elif page == last:  # Last Page
+        prev = "/?page=" + str(page - 1)
+        next = "#"
+    else:  # Middle Page
+        next = "/?page=" + str(page + 1)
+        prev = "/?page=" + str(page - 1)
+
+    return render_template("index.html", params=params, posts=posts, prev=prev, next=next)
+
+
+@app.route("/post/<string:post_slug>", methods=['GET'])
+def post_route(post_slug):
+    posts = Posts.query.filter_by(slug=post_slug).first()
+    return render_template('post.html', params=params)
 
 
 @app.route('/about')
